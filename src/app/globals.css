@@ -1,26 +1,128 @@
 @import "tailwindcss";
 
+/* ─── Ploni Font ─────────────────────────────────────────── */
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-UltraLight.otf") format("opentype");
+  font-weight: 100; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-Light.otf") format("opentype");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-Regular.otf") format("opentype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-Medium.otf") format("opentype");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-DemiBold.otf") format("opentype");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-Bold.otf") format("opentype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-UltraBold.otf") format("opentype");
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Ploni";
+  src: url("/fonts/Ploni1.1AAA-Black.otf") format("opentype");
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+
+/* ─── Design Tokens ─────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Public site */
+  --background: #FAF8F5;
+  --surface:    #FFFFFF;
+  --stone:      #E9E2D8;
+  --taupe:      #CFC5B8;
+  --gold:       #B08D57;
+  --text:       #2E2A26;
+  --text-light: #6B6763;
+  --border:     #ECE8E2;
+
+  /* Admin */
+  --navy:       #0F2747;
+  --navy-light: #1A3A6B;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ─── Base ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { direction: rtl; scroll-behavior: smooth; }
 
 body {
+  font-family: "Ploni", system-ui, sans-serif;
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--stone); }
+::-webkit-scrollbar-thumb { background: var(--taupe); border-radius: 99px; }
+
+/* ─── Public: Product Card ───────────────────────────────── */
+.product-card {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(46, 42, 38, 0.10);
+}
+
+/* ─── Category Card ──────────────────────────────────────── */
+.category-card {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(46, 42, 38, 0.12);
+}
+.category-card img {
+  transition: transform 0.5s ease;
+}
+.category-card:hover img {
+  transform: scale(1.04);
+}
+
+/* ─── Gold Divider ───────────────────────────────────────── */
+.gold-line {
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto;
+}
+
+/* ─── Admin Sidebar ──────────────────────────────────────── */
+.admin-nav-link {
+  transition: all 0.15s ease;
+}
+.admin-nav-link:hover,
+.admin-nav-link.active {
+  background: rgba(176, 141, 87, 0.08);
+  border-right: 2px solid var(--gold);
+  color: var(--gold);
 }
