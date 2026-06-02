@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 interface ProductImage {
   id: string;
@@ -46,6 +47,7 @@ export function ProductCard(props: ProductCardProps) {
   const priceRange = formatPriceRange(props);
 
   return (
+    <ScrollReveal variant="up" duration={0.5}>
     <Link href={`/product/${props.id}`} className="group block">
       <article className="bg-white border border-[#ECE8E2] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(46,42,38,0.10)]" style={{ borderRadius: "16px" }}>
         {/* Image */}
@@ -117,5 +119,6 @@ export function ProductCard(props: ProductCardProps) {
         </div>
       </article>
     </Link>
+    </ScrollReveal>
   );
 }

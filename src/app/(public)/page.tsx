@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 const categories = [
   {
@@ -63,32 +66,40 @@ export default function HomePage() {
         <div className="relative flex flex-col items-center justify-center text-center px-6 pt-32 pb-24" style={{ minHeight: "88vh" }}>
 
           {/* Eyebrow */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-px w-12 bg-[#B08D57]" />
-            <span className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase font-medium">
-              Premium Judaica Gifts
-            </span>
-            <div className="h-px w-12 bg-[#B08D57]" />
-          </div>
+          <ScrollReveal variant="fade" delay={0.1}>
+            <div className="flex items-center gap-3 mb-10">
+              <div className="h-px w-12 bg-[#B08D57]" />
+              <span className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase font-medium">
+                Premium Judaica Gifts
+              </span>
+              <div className="h-px w-12 bg-[#B08D57]" />
+            </div>
+          </ScrollReveal>
 
           {/* Headline */}
-          <h1
-            className="font-['Ploni'] font-light text-[#2E2A26] leading-tight mb-6"
-            style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)" }}
-          >
-            מתנה עם ערך
-          </h1>
+          <ScrollReveal variant="up" delay={0.2} duration={0.8}>
+            <h1
+              className="font-['Ploni'] font-light text-[#2E2A26] leading-tight mb-6"
+              style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)" }}
+            >
+              מתנה עם ערך
+            </h1>
+          </ScrollReveal>
 
-          <p className="text-[#6B6763] text-lg font-light max-w-sm mb-12 leading-relaxed">
-            מתנות יהודיות עם משמעות שנשארת
-          </p>
+          <ScrollReveal variant="up" delay={0.4}>
+            <p className="text-[#6B6763] text-lg font-light max-w-sm mb-12 leading-relaxed">
+              מתנות יהודיות עם משמעות שנשארת
+            </p>
+          </ScrollReveal>
 
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-3 px-10 py-4 bg-[#2E2A26] text-white text-sm tracking-widest uppercase hover:bg-[#B08D57] transition-colors duration-300"
-          >
-            לצפייה בקטלוג
-          </Link>
+          <ScrollReveal variant="up" delay={0.6}>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-3 px-10 py-4 bg-[#2E2A26] text-white text-sm tracking-widest uppercase hover:bg-[#B08D57] transition-colors duration-300"
+            >
+              לצפייה בקטלוג
+            </Link>
+          </ScrollReveal>
         </div>
 
         {/* Scroll indicator */}
@@ -101,11 +112,13 @@ export default function HomePage() {
       <section className="bg-white border-y border-[#ECE8E2]">
         <div className="max-w-5xl mx-auto px-6 py-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-x-reverse divide-[#ECE8E2]">
-            {features.map(({ label, sub }) => (
-              <div key={label} className="text-center px-6">
-                <p className="text-sm font-semibold text-[#2E2A26] mb-1">{label}</p>
-                <p className="text-xs text-[#6B6763]">{sub}</p>
-              </div>
+            {features.map(({ label, sub }, i) => (
+              <ScrollReveal key={label} variant="up" delay={i * 0.1} duration={0.5}>
+                <div className="text-center px-6">
+                  <p className="text-sm font-semibold text-[#2E2A26] mb-1">{label}</p>
+                  <p className="text-xs text-[#6B6763]">{sub}</p>
+                </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -116,35 +129,39 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
 
           {/* Section header */}
-          <div className="text-center mb-16">
-            <p className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase mb-4">קולקציות</p>
-            <h2 className="font-['Ploni'] font-light text-[#2E2A26] text-4xl lg:text-5xl">
-              מתנות לכל אירוע
-            </h2>
-            <div className="gold-line mt-6" />
-          </div>
+          <ScrollReveal variant="up" duration={0.7}>
+            <div className="text-center mb-16">
+              <p className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase mb-4">קולקציות</p>
+              <h2 className="font-['Ploni'] font-light text-[#2E2A26] text-4xl lg:text-5xl">
+                מתנות לכל אירוע
+              </h2>
+              <div className="gold-line mt-6" />
+            </div>
+          </ScrollReveal>
 
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((cat) => (
-              <Link key={cat.slug} href={`/products?holiday=${cat.slug}`} className="category-card group block">
-                {/* Image */}
-                <div className="relative overflow-hidden bg-[#E9E2D8]" style={{ aspectRatio: "4/3" }}>
-                  <Image
-                    src={cat.image}
-                    alt={cat.name}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-[#2E2A26]/0 group-hover:bg-[#2E2A26]/10 transition-colors duration-500" />
-                </div>
+            {categories.map((cat, i) => (
+              <ScrollReveal key={cat.slug} variant="up" delay={i * 0.08} duration={0.6}>
+                <Link href={`/products?holiday=${cat.slug}`} className="category-card group block">
+                  {/* Image */}
+                  <div className="relative overflow-hidden bg-[#E9E2D8]" style={{ aspectRatio: "4/3" }}>
+                    <Image
+                      src={cat.image}
+                      alt={cat.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-[#2E2A26]/0 group-hover:bg-[#2E2A26]/10 transition-colors duration-500" />
+                  </div>
 
-                {/* Caption */}
-                <div className="bg-white px-6 py-5 flex items-center justify-between border-t border-[#ECE8E2]">
-                  <span className="font-['Ploni'] text-[#2E2A26] font-medium">{cat.name}</span>
-                  <span className="text-[#B08D57] text-lg leading-none">←</span>
-                </div>
-              </Link>
+                  {/* Caption */}
+                  <div className="bg-white px-6 py-5 flex items-center justify-between border-t border-[#ECE8E2]">
+                    <span className="font-['Ploni'] text-[#2E2A26] font-medium">{cat.name}</span>
+                    <span className="text-[#B08D57] text-lg leading-none">←</span>
+                  </div>
+                </Link>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -153,44 +170,50 @@ export default function HomePage() {
       {/* ── Philosophy ───────────────────────────────────── */}
       <section className="bg-white py-28 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="gold-line mb-10" />
-          <h2
-            className="font-['Ploni'] font-light text-[#2E2A26] leading-relaxed mb-8"
-            style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)" }}
-          >
-            "כל מתנה היא הזדמנות ליצור קשר שנשאר"
-          </h2>
-          <p className="text-[#6B6763] text-base leading-relaxed max-w-xl mx-auto">
-            אנו מלווים שלוחי חב״ד ברחבי העולם במציאת המתנה המושלמת — מיתוג אישי,
-            איכות יוקרתית, ומשלוח לכל יעד בעולם.
-          </p>
-          <div className="gold-line mt-10" />
+          <ScrollReveal variant="scale" duration={0.8}>
+            <div className="gold-line mb-10" />
+            <h2
+              className="font-['Ploni'] font-light text-[#2E2A26] leading-relaxed mb-8"
+              style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.5rem)" }}
+            >
+              "כל מתנה היא הזדמנות ליצור קשר שנשאר"
+            </h2>
+            <p className="text-[#6B6763] text-base leading-relaxed max-w-xl mx-auto">
+              אנו מלווים שלוחי חב״ד ברחבי העולם במציאת המתנה המושלמת — מיתוג אישי,
+              איכות יוקרתית, ומשלוח לכל יעד בעולם.
+            </p>
+            <div className="gold-line mt-10" />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="bg-[#2E2A26] py-28 px-6 text-center">
-        <p className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase mb-6">מוכנים להתחיל?</p>
-        <h2
-          className="font-['Ploni'] font-light text-white mb-10 leading-tight"
-          style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
-        >
-          הצטרפו למשפחת מתנה עם ערך
-        </h2>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/register"
-            className="inline-flex items-center justify-center px-10 py-4 bg-[#B08D57] text-white text-sm tracking-widest uppercase hover:bg-[#9a7a48] transition-colors duration-300"
+        <ScrollReveal variant="up" delay={0.1}>
+          <p className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase mb-6">מוכנים להתחיל?</p>
+          <h2
+            className="font-['Ploni'] font-light text-white mb-10 leading-tight"
+            style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}
           >
-            הרשמה חינם
-          </Link>
-          <Link
-            href="/products"
-            className="inline-flex items-center justify-center px-10 py-4 border border-white/30 text-white text-sm tracking-widest uppercase hover:border-white/60 transition-colors duration-300"
-          >
-            לצפייה בקטלוג
-          </Link>
-        </div>
+            הצטרפו למשפחת מתנה עם ערך
+          </h2>
+        </ScrollReveal>
+        <ScrollReveal variant="up" delay={0.3}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center px-10 py-4 bg-[#B08D57] text-white text-sm tracking-widest uppercase hover:bg-[#9a7a48] transition-colors duration-300"
+            >
+              הרשמה חינם
+            </Link>
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center px-10 py-4 border border-white/30 text-white text-sm tracking-widest uppercase hover:border-white/60 transition-colors duration-300"
+            >
+              לצפייה בקטלוג
+            </Link>
+          </div>
+        </ScrollReveal>
       </section>
     </>
   );
