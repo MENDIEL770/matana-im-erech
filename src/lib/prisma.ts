@@ -7,18 +7,19 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL ?? "";
+  const isProduction = process.env.NODE_ENV === "production";
+
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 1,
+    connectionString,
+    max: 2,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+    connectionTimeoutMillis: 15000,
+    ssl: isProduction ? { rejectUnauthorized: false } : undefined,
   });
+
   const adapter = new PrismaPg(pool);
-  return new PrismaClient({
-    adapter,
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  return new PrismaClient({ adapter, log: ["error"] });
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
