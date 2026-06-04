@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FileText, Mail, Printer } from "lucide-react";
 
 interface Props {
   quoteId: string;
@@ -15,6 +16,34 @@ export default function QuoteActions({ quoteId, status, orderId, orderNumber }: 
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  const sendEmail = async () => {
+    setLoading("email");
+    setError("");
+    try {
+      const res = await fetch(`/api/quotes/${quoteId}/pdf`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "email" }),
+      });
+      if (!res.ok) throw new Error("שגיאה בשליחת המייל");
+      alert("המייל נשלח בהצלחה ללקוח!");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "שגיאה");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const openPDF = () => {
+    window.open(`/api/quotes/${quoteId}/pdf`, "_blank");
+  };
+
+  const printQuote = () => {
+    const win = window.open(`/api/quotes/${quoteId}/pdf`, "_blank");
+    win?.addEventListener("load", () => win.print());
+  };
 
   const act = async (action: string) => {
     setLoading(action);
@@ -59,6 +88,32 @@ export default function QuoteActions({ quoteId, status, orderId, orderNumber }: 
       {error && (
         <p className="text-xs text-red-500 bg-red-50 border border-red-200 px-3 py-1.5">{error}</p>
       )}
+
+      {/* PDF / Print / Email buttons */}
+      <div className="flex flex-wrap gap-2 justify-end mb-2">
+        <button
+          onClick={openPDF}
+          className="flex items-center gap-1.5 border border-[#ECE8E2] bg-white text-[#2E2A26] px-4 py-2 text-xs font-semibold hover:bg-[#FAF8F5] transition-colors"
+        >
+          <FileText size={14} />
+          הצג PDF
+        </button>
+        <button
+          onClick={printQuote}
+          className="flex items-center gap-1.5 border border-[#ECE8E2] bg-white text-[#2E2A26] px-4 py-2 text-xs font-semibold hover:bg-[#FAF8F5] transition-colors"
+        >
+          <Printer size={14} />
+          הדפס
+        </button>
+        <button
+          onClick={sendEmail}
+          disabled={loading !== null}
+          className="flex items-center gap-1.5 bg-[#B08D57] text-white px-4 py-2 text-xs font-semibold hover:bg-[#9a7a48] disabled:opacity-40 transition-colors"
+        >
+          <Mail size={14} />
+          {loading === "email" ? "שולח..." : "שלח במייל"}
+        </button>
+      </div>
 
       <div className="flex flex-wrap gap-2 justify-end">
         {/* Send */}
