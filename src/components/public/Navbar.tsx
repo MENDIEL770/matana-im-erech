@@ -82,16 +82,16 @@ export function Navbar() {
       {/* Spacer */}
       <div style={{ height: "80px" }} />
 
-      {/* Mobile menu */}
+      {/* Mobile menu — full screen overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed top-[80px] inset-x-0 bg-white border-b border-[#ECE8E2] z-40 px-6 py-6">
-          <nav className="flex flex-col gap-5">
+        <div className="lg:hidden fixed top-[80px] inset-x-0 bottom-0 bg-white z-40 overflow-y-auto" dir="rtl">
+          <nav className="flex flex-col px-6 pt-4 pb-10">
             {navLinks.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-base text-[#2E2A26] border-b border-[#ECE8E2] pb-4"
+                className="text-lg font-light text-[#2E2A26] border-b border-[#ECE8E2] py-5"
               >
                 {l.label}
               </Link>
@@ -99,9 +99,16 @@ export function Navbar() {
             <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
-              className="text-base text-[#B08D57]"
+              className="text-lg font-light text-[#B08D57] border-b border-[#ECE8E2] py-5"
             >
               כניסה לחשבון
+            </Link>
+            <Link
+              href="/register"
+              onClick={() => setMobileOpen(false)}
+              className="mt-6 text-center py-4 bg-[#2E2A26] text-white text-sm tracking-widest uppercase"
+            >
+              הרשמה חינם
             </Link>
           </nav>
         </div>

@@ -151,6 +151,7 @@ export default function HomePage() {
                       alt={cat.name}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-[#2E2A26]/0 group-hover:bg-[#2E2A26]/10 transition-colors duration-500" />
                   </div>

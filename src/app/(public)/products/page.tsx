@@ -86,10 +86,35 @@ export default async function ProductsPage({
         <div className="mt-5 mx-auto w-12 h-px bg-[#B08D57]" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+      {/* Mobile filter bar */}
+      <div className="lg:hidden bg-white border-b border-[#ECE8E2] px-4 py-3 overflow-x-auto" dir="rtl">
+        <div className="flex gap-2 w-max">
+          <Link
+            href="/products"
+            className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${
+              !holiday && !category ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"
+            }`}
+          >
+            הכל
+          </Link>
+          {HOLIDAYS.map((h) => (
+            <Link
+              key={h.value}
+              href={`/products?holiday=${h.value}`}
+              className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${
+                holiday === h.value ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"
+              }`}
+            >
+              {h.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-10" dir="rtl">
-          {/* Sidebar filters */}
-          <aside className="lg:w-56 shrink-0 space-y-8">
+          {/* Sidebar filters — desktop only */}
+          <aside className="hidden lg:block lg:w-56 shrink-0 space-y-8">
             {/* Holidays */}
             <div>
               <p className="text-[10px] tracking-[0.25em] text-[#6B6763] uppercase mb-4 font-medium">
@@ -153,7 +178,7 @@ export default async function ProductsPage({
 
           {/* Product grid */}
           <main className="flex-1">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-6">
               <Suspense
                 fallback={Array.from({ length: 8 }).map((_, i) => (
                   <div
