@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ProductCard } from "@/components/public/ProductCard";
 
+export const revalidate = 300; // cache 5 דקות
+
 const HOLIDAYS = [
   { value: "pesach", label: "פסח" },
   { value: "rosh-hashana", label: "ראש השנה" },
