@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Resend } from "resend";
 
-function getResend() {
-  return new Resend(process.env.RESEND_API_KEY);
-}
+export const dynamic = "force-dynamic";
 
 function formatCurrency(n: number) {
   return `₪${n.toLocaleString("he-IL", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -173,7 +170,8 @@ export async function POST(
   const html = buildQuoteHTML(quote);
 
   if (action === "email") {
-    const resend = getResend();
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
       from: "מתנה עם ערך <onboarding@resend.dev>",
       to: [quote.customer.email],
