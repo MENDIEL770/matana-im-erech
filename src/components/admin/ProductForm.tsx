@@ -55,7 +55,38 @@ export function ProductForm({ product }: { product?: any }) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const raw = Object.fromEntries(formData.entries());
+
+    // Numeric fields
+    const numericFields = [
+      "costPrice","regularPrice","price20","price50","price100","price250","price500",
+      "minPrice","minQuantity","embroideryPrice","engravingPrice","logoprintPrice",
+      "embossingPrice","stock","minStock","leadTimeDays",
+    ];
+    // Boolean fields (checkboxes)
+    const boolFields = [
+      "hasEmbroidery","hasEngraving","hasLogoprint","hasEmbossing","hasPersonal",
+      "isFeatured","isNew","isActive",
+    ];
+    // Nullable enum fields
+    const nullableEnums = ["tag","categoryId","holidays"];
+
+    const data: Record<string, any> = { ...raw };
+
+    numericFields.forEach((f) => {
+      if (data[f] !== undefined) {
+        const n = parseFloat(data[f] as string);
+        data[f] = isNaN(n) ? null : n;
+      }
+    });
+
+    boolFields.forEach((f) => {
+      data[f] = formData.has(f);
+    });
+
+    nullableEnums.forEach((f) => {
+      if (data[f] === "" || data[f] === undefined) data[f] = null;
+    });
 
     try {
       const res = await fetch(product ? `/api/products/${product.id}` : "/api/products", {
@@ -66,6 +97,9 @@ export function ProductForm({ product }: { product?: any }) {
       if (res.ok) {
         router.push("/admin/products");
         router.refresh();
+      } else {
+        const err = await res.json();
+        alert("שגיאה: " + (err.error || "לא ניתן לשמור"));
       }
     } finally {
       setLoading(false);
