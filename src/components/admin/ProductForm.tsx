@@ -95,11 +95,24 @@ export function ProductForm({ product }: { product?: any }) {
         body: JSON.stringify({ ...data, costs, fields }),
       });
       if (res.ok) {
-        router.push("/admin/products");
+        const saved = await res.json();
+        // אחרי יצירה — עבור לדף עריכה כדי להעלות תמונות
+        // אחרי עדכון — חזור לרשימה
+        if (product) {
+          router.push("/admin/products");
+        } else {
+          router.push(`/admin/products/${saved.id}`);
+        }
         router.refresh();
       } else {
         const err = await res.json();
-        alert("שגיאה: " + (err.error || "לא ניתן לשמור"));
+        const msg = typeof err.error === "string"
+          ? err.error
+          : err.error?.formErrors?.[0]
+            ?? err.error?.fieldErrors
+              ? "שדות חסרים: " + Object.keys(err.error.fieldErrors ?? {}).join(", ")
+              : "לא ניתן לשמור — בדוק שכל השדות תקינים";
+        alert("שגיאה: " + msg);
       }
     } finally {
       setLoading(false);

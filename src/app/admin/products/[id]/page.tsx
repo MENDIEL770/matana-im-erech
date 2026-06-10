@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 
 export default async function EditProductPage({
   params,
@@ -24,41 +25,60 @@ export default async function EditProductPage({
 
   if (!product) notFound();
 
+  // Serialize Decimals to plain numbers for client components
+  const serialized = JSON.parse(JSON.stringify(product));
+
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-[#6B6763]">
-        <Link href="/admin/products" className="hover:text-[#2E2A26] transition-colors flex items-center gap-1">
-          <ArrowRight size={14} />
-          מוצרים
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Link
+              href="/admin/products"
+              className="hover:text-gray-900 transition-colors flex items-center gap-1"
+            >
+              <ArrowRight size={14} />
+              חזור לרשימה
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">{product.name}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-['Ploni'] text-2xl text-[#0F2747] font-light">
+              {product.name}
+            </h1>
+            <Badge variant="gray" className="font-mono text-xs">
+              {product.sku}
+            </Badge>
+          </div>
+        </div>
+        <Link href="/admin/products/new">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#B08D57] text-white text-sm rounded-sm hover:bg-[#9a7a48] transition-colors">
+            <Plus size={14} />
+            מוצר חדש
+          </button>
         </Link>
-        <span>/</span>
-        <span className="text-[#2E2A26] font-medium">{product.name}</span>
       </div>
 
-      <div>
-        <h1 className="font-['Ploni'] text-2xl text-[#2E2A26] font-light">עריכת מוצר</h1>
-        <p className="text-sm text-[#6B6763] mt-1">מק"ט: {product.sku}</p>
-      </div>
+      {/* Main layout: Left 60% form | Right 40% images */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Left: Product Form (60%) */}
+        <div className="w-full lg:w-[60%]">
+          <ProductForm product={serialized} />
+        </div>
 
-      {/* Images section */}
-      <div className="bg-white border border-[#ECE8E2] rounded-2xl p-6 space-y-4">
-        <h2 className="font-semibold text-[#2E2A26]">תמונות מוצר</h2>
-        <ImageUploader
-          productId={product.id}
-          initialImages={product.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            altText: img.altText,
-            isPrimary: img.isPrimary,
-            isHover: img.isHover,
-            order: img.order,
-          }))}
-        />
+        {/* Right: Image Uploader (40%) */}
+        <div className="w-full lg:w-[40%] sticky top-6">
+          <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5 space-y-4">
+            <h2 className="font-semibold text-[#0F2747] text-sm">תמונות מוצר</h2>
+            <ImageUploader
+              productId={product.id}
+              initialImages={serialized.images}
+            />
+          </div>
+        </div>
       </div>
-
-      {/* Product form */}
-      <ProductForm product={product} />
     </div>
   );
 }
