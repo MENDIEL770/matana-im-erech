@@ -5,7 +5,7 @@ import { z } from "zod";
 const productSchema = z.object({
   name: z.string().min(1),
   sku: z.string().min(1),
-  categoryId: z.string().optional(),
+  categoryId: z.string().nullish(),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
   productType: z.enum(["MANUFACTURED", "PURCHASED", "IMPORTED", "SPECIAL_ORDER"]).default("MANUFACTURED"),
