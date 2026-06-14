@@ -19,6 +19,7 @@ const navGroups = [
     label: "מוצרים",
     items: [
       { href: "/admin/products", label: "מוצרים", icon: Package },
+      { href: "/admin/categories", label: "קטגוריות", icon: Tag },
       { href: "/admin/inventory", label: "מלאי", icon: Warehouse },
     ],
   },
