@@ -2,36 +2,24 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ProductCard } from "@/components/public/ProductCard";
+import { CategoryTree } from "@/components/public/CategoryTree";
 
-export const revalidate = 300; // cache 5 דקות
+export const revalidate = 300;
 
-const HOLIDAYS = [
-  { value: "pesach", label: "פסח" },
-  { value: "rosh-hashana", label: "ראש השנה" },
-  { value: "chanuka", label: "חנוכה" },
-  { value: "purim", label: "פורים" },
-  { value: "bar-mitzva", label: "בר מצווה" },
-  { value: "chanokat-bait", label: "חנוכת בית" },
-  { value: "shavuot", label: "שבועות" },
-  { value: "sukkot", label: "סוכות" },
-];
+async function ProductsGrid({ categoryId }: { categoryId?: string }) {
+  // If categoryId is a main category, include all its sub-categories
+  const subCategoryIds = categoryId
+    ? (await prisma.category.findMany({ where: { parentId: categoryId }, select: { id: true } })).map(c => c.id)
+    : [];
 
-async function ProductsGrid({
-  holiday,
-  categoryId,
-}: {
-  holiday?: string;
-  categoryId?: string;
-}) {
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
-      ...(holiday ? { holidays: { has: holiday } } : {}),
-      ...(categoryId ? { categoryId } : {}),
+      ...(categoryId
+        ? { categoryId: subCategoryIds.length > 0 ? { in: [categoryId, ...subCategoryIds] } : categoryId }
+        : {}),
     },
-    include: {
-      images: { orderBy: { order: "asc" } },
-    },
+    include: { images: { orderBy: { order: "asc" } } },
     orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
   });
 
@@ -68,14 +56,28 @@ async function ProductsGrid({
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ holiday?: string; category?: string }>;
+  searchParams: Promise<{ category?: string }>;
 }) {
-  const { holiday, category } = await searchParams;
+  const { category } = await searchParams;
 
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { order: "asc" },
+  // Fetch tree for sidebar
+  const tree = await prisma.category.findMany({
+    where: { parentId: null, isActive: true },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    include: {
+      children: {
+        where: { isActive: true },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+        include: { _count: { select: { products: true } } },
+      },
+      _count: { select: { products: true } },
+    },
   });
+
+  // Active category name for header
+  const activeCategory = category
+    ? await prisma.category.findUnique({ where: { id: category }, select: { name: true } })
+    : null;
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
@@ -83,7 +85,7 @@ export default async function ProductsPage({
       <div className="bg-white border-b border-[#ECE8E2] py-14 px-6 text-center">
         <p className="text-[11px] tracking-[0.3em] text-[#B08D57] uppercase mb-3">קטלוג</p>
         <h1 className="font-['Ploni'] font-light text-[#2E2A26] text-4xl lg:text-5xl">
-          {holiday ? HOLIDAYS.find((h) => h.value === holiday)?.label ?? "מוצרים" : "כל המוצרים"}
+          {activeCategory?.name ?? "כל המוצרים"}
         </h1>
         <div className="mt-5 mx-auto w-12 h-px bg-[#B08D57]" />
       </div>
@@ -91,23 +93,14 @@ export default async function ProductsPage({
       {/* Mobile filter bar */}
       <div className="lg:hidden bg-white border-b border-[#ECE8E2] px-4 py-3 overflow-x-auto" dir="rtl">
         <div className="flex gap-2 w-max">
-          <Link
-            href="/products"
-            className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${
-              !holiday && !category ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"
-            }`}
-          >
+          <Link href="/products"
+            className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${!category ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"}`}>
             הכל
           </Link>
-          {HOLIDAYS.map((h) => (
-            <Link
-              key={h.value}
-              href={`/products?holiday=${h.value}`}
-              className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${
-                holiday === h.value ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"
-              }`}
-            >
-              {h.label}
+          {tree.map(main => (
+            <Link key={main.id} href={`/products?category=${main.id}`}
+              className={`whitespace-nowrap px-4 py-2 text-sm rounded-full transition-colors ${category === main.id ? "bg-[#2E2A26] text-white" : "bg-[#FAF8F5] text-[#6B6763]"}`}>
+              {main.name}
             </Link>
           ))}
         </div>
@@ -115,82 +108,18 @@ export default async function ProductsPage({
 
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-10" dir="rtl">
-          {/* Sidebar filters — desktop only */}
-          <aside className="hidden lg:block lg:w-56 shrink-0 space-y-8">
-            {/* Holidays */}
-            <div>
-              <p className="text-[10px] tracking-[0.25em] text-[#6B6763] uppercase mb-4 font-medium">
-                חגים ואירועים
-              </p>
-              <ul className="space-y-1">
-                <li>
-                  <Link
-                    href="/products"
-                    className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
-                      !holiday && !category
-                        ? "bg-[#2E2A26] text-white"
-                        : "text-[#6B6763] hover:text-[#2E2A26] hover:bg-white"
-                    }`}
-                  >
-                    כל המוצרים
-                  </Link>
-                </li>
-                {HOLIDAYS.map((h) => (
-                  <li key={h.value}>
-                    <Link
-                      href={`/products?holiday=${h.value}`}
-                      className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
-                        holiday === h.value
-                          ? "bg-[#2E2A26] text-white"
-                          : "text-[#6B6763] hover:text-[#2E2A26] hover:bg-white"
-                      }`}
-                    >
-                      {h.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Categories */}
-            {categories.length > 0 && (
-              <div>
-                <p className="text-[10px] tracking-[0.25em] text-[#6B6763] uppercase mb-4 font-medium">
-                  קטגוריות
-                </p>
-                <ul className="space-y-1">
-                  {categories.map((cat) => (
-                    <li key={cat.id}>
-                      <Link
-                        href={`/products?category=${cat.id}`}
-                        className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
-                          category === cat.id
-                            ? "bg-[#2E2A26] text-white"
-                            : "text-[#6B6763] hover:text-[#2E2A26] hover:bg-white"
-                        }`}
-                      >
-                        {cat.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {/* Sidebar */}
+          <aside className="hidden lg:block lg:w-56 shrink-0">
+            <CategoryTree tree={tree} activeId={category} />
           </aside>
 
           {/* Product grid */}
           <main className="flex-1">
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-6">
-              <Suspense
-                fallback={Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white border border-[#ECE8E2] rounded-2xl animate-pulse"
-                    style={{ aspectRatio: "0.85" }}
-                  />
-                ))}
-              >
-                <ProductsGrid holiday={holiday} categoryId={category} />
+              <Suspense fallback={Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-white border border-[#ECE8E2] rounded-2xl animate-pulse" style={{ aspectRatio: "0.85" }} />
+              ))}>
+                <ProductsGrid categoryId={category} />
               </Suspense>
             </div>
           </main>

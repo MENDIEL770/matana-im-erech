@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
+import { CategorySelect } from "@/components/admin/CategorySelect";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 
 const FIELD_OPTIONS = [
@@ -164,6 +165,9 @@ export function ProductForm({ product }: { product?: any }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Input label="שם מוצר" name="name" defaultValue={product?.name} required />
             <Input label='מק"ט' name="sku" defaultValue={product?.sku} required />
+            <div className="md:col-span-2">
+              <CategorySelect defaultValue={product?.categoryId} />
+            </div>
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-700 block mb-1">תיאור קצר</label>
               <textarea

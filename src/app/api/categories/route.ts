@@ -6,9 +6,23 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const categories = await prisma.category.findMany({
     orderBy: [{ order: "asc" }, { name: "asc" }],
-    include: { _count: { select: { products: true } } },
+    include: {
+      _count: { select: { products: true } },
+      children: {
+        where: { isActive: true },
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+        include: { _count: { select: { products: true } } },
+      },
+    },
+    where: { parentId: null }, // only top-level
   });
   return NextResponse.json(categories);
+}
+
+// flat list for selects (admin)
+export async function HEAD() {
+  const all = await prisma.category.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] });
+  return NextResponse.json(all);
 }
 
 export async function POST(req: NextRequest) {
