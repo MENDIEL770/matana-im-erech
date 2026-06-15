@@ -5,6 +5,7 @@ import crypto from "crypto";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  try {
   const { identifier, method } = await req.json();
   // identifier = email or phone, method = "email" | "sms"
 
@@ -12,11 +13,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "חסרים פרטים" }, { status: 400 });
   }
 
+  console.log("[ForgotPassword] identifier:", identifier, "method:", method);
+
   // Find user
   const isEmail = identifier.includes("@");
   const user = isEmail
     ? await prisma.user.findUnique({ where: { email: identifier } })
     : await prisma.user.findFirst({ where: { customer: { phone: identifier } }, include: { customer: true } });
+
+  console.log("[ForgotPassword] user found:", user ? user.email : "לא נמצא");
 
   // Always return success to prevent enumeration
   if (!user) return NextResponse.json({ success: true });
@@ -70,4 +75,9 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ success: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[ForgotPassword] Unexpected error:", e);
+    return NextResponse.json({ error: "שגיאה פנימית", detail: msg }, { status: 500 });
+  }
 }

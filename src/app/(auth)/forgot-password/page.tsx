@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, MessageCircle, ArrowRight } from "lucide-react";
+import { MessageCircle, ArrowRight } from "lucide-react";
 
 const inputClass = "w-full px-4 py-3 text-sm border border-[#ECE8E2] bg-[#FAF8F5] text-[#2E2A26] placeholder:text-[#CFC5B8] focus:outline-none focus:border-[#B08D57] transition-colors";
 
@@ -10,7 +10,7 @@ type Step = "identify" | "code" | "newPassword" | "done";
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<Step>("identify");
   const [identifier, setIdentifier] = useState("");
-  const [method, setMethod] = useState<"email" | "sms">("email");
+  const [method, setMethod] = useState<"email" | "sms">("sms");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -65,18 +65,9 @@ export default function ForgotPasswordPage() {
               onKeyDown={(e) => e.key === "Enter" && handleSendCode()} />
           </div>
 
-          <div>
-            <label className="block text-xs tracking-widest text-[#6B6763] uppercase mb-3">שלח קוד דרך</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setMethod("email")}
-                className={`flex items-center justify-center gap-2 py-3 border rounded-sm text-sm transition-colors ${method === "email" ? "border-[#B08D57] bg-[#FAF8F5] text-[#B08D57]" : "border-[#ECE8E2] text-[#6B6763] hover:border-[#B08D57]"}`}>
-                <Mail size={15} /> אימייל
-              </button>
-              <button type="button" onClick={() => setMethod("sms")}
-                className={`flex items-center justify-center gap-2 py-3 border rounded-sm text-sm transition-colors ${method === "sms" ? "border-[#B08D57] bg-[#FAF8F5] text-[#B08D57]" : "border-[#ECE8E2] text-[#6B6763] hover:border-[#B08D57]"}`}>
-                <MessageCircle size={15} /> SMS
-              </button>
-            </div>
+          <div className="flex items-center gap-2 text-xs text-[#6B6763]">
+            <MessageCircle size={14} className="text-[#B08D57]" />
+            <span>הקוד ישלח ב-SMS למספר הטלפון הרשום</span>
           </div>
 
           {error && <p className="text-xs text-red-500">{error}</p>}
@@ -91,7 +82,7 @@ export default function ForgotPasswordPage() {
       {step === "code" && (
         <div className="space-y-5">
           <p className="text-xs text-[#6B6763] text-center mb-6">
-            שלחנו קוד בן 6 ספרות ל{method === "email" ? `אימייל ${identifier}` : `טלפון ${identifier}`}
+            שלחנו קוד בן 6 ספרות ב-SMS למספר {identifier}
           </p>
           <div>
             <label className="block text-xs tracking-widest text-[#6B6763] uppercase mb-2">קוד אימות</label>
