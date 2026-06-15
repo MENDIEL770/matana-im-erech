@@ -57,7 +57,7 @@ export async function PATCH(
   ] as const;
 
   // Admins can also update tier, notes, businessNumber, etc.
-  const adminFields = ["tier", "notes", "businessNumber", "isActive"] as const;
+  const adminFields = ["tier", "notes", "businessNumber", "isActive", "marketingConsent", "directDebitInterest"] as const;
 
   const data: Record<string, unknown> = {};
   for (const field of allowedFields) {
