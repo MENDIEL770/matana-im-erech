@@ -66,7 +66,7 @@ export function ProductForm({ product }: { product?: any }) {
     // Boolean fields (checkboxes)
     const boolFields = [
       "hasEmbroidery","hasEngraving","hasLogoprint","hasEmbossing","hasPersonal",
-      "isFeatured","isNew","isActive",
+      "isFeatured","isNew","isActive","isCustomizable",
     ];
     // Nullable enum fields
     const nullableEnums = ["tag","categoryId","holidays"];
@@ -212,6 +212,10 @@ export function ProductForm({ product }: { product?: any }) {
             <div className="flex items-center gap-3">
               <input type="checkbox" name="isActive" id="isActive" defaultChecked={product?.isActive ?? true} className="w-4 h-4 accent-[#B08D57]" />
               <label htmlFor="isActive" className="text-sm text-gray-700">מוצר פעיל (מוצג באתר)</label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" name="isCustomizable" id="isCustomizable" defaultChecked={product?.isCustomizable} className="w-4 h-4 accent-[#B08D57]" />
+              <label htmlFor="isCustomizable" className="text-sm text-gray-700">אפשר עיצוב אישי (לוגו / טקסט / ברקמה)</label>
             </div>
           </div>
         </Card>

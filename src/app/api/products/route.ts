@@ -38,6 +38,7 @@ const productSchema = z.object({
   tag: z.enum(["NEW", "RECOMMENDED", "POPULAR", "PREMIUM"]).optional().nullable(),
   isFeatured: z.coerce.boolean().default(false),
   isActive: z.coerce.boolean().default(true),
+  isCustomizable: z.coerce.boolean().default(false),
   costs: z.array(z.object({
     label: z.string(),
     amount: z.coerce.number(),

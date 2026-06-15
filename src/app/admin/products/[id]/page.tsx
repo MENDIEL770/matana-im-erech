@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { FontUploader } from "@/components/admin/FontUploader";
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -77,6 +78,19 @@ export default async function EditProductPage({
               initialImages={serialized.images}
             />
           </div>
+
+          {product.isCustomizable && (
+            <div className="bg-white border border-gray-200 rounded-sm shadow-sm p-5 space-y-4">
+              <div>
+                <h2 className="font-semibold text-[#0F2747] text-sm">פונטים לעיצוב אישי</h2>
+                <p className="text-xs text-gray-400 mt-1">הלקוח יבחר מתוך הפונטים שתעלה כאן</p>
+              </div>
+              <FontUploader
+                productId={product.id}
+                initialFonts={(serialized.customFonts as { name: string; url: string }[]) ?? []}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

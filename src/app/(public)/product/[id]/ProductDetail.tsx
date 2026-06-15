@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Download } from "lucide-react";
+import { Download, Palette } from "lucide-react";
+import { CustomizationEditor } from "@/components/public/CustomizationEditor";
 
 interface ProductImage {
   id: string;
@@ -40,6 +41,8 @@ interface Product {
   hasLogoprint: boolean;
   hasEmbossing: boolean;
   hasPersonal: boolean;
+  isCustomizable: boolean;
+  customFonts?: { name: string; url: string }[] | null;
   tag?: string | null;
   images: ProductImage[];
   fields: ProductField[];
@@ -69,6 +72,8 @@ export function ProductDetail({ product }: { product: Product }) {
   const [shippingType, setShippingType] = useState<"CONSOLIDATED" | "DIRECT_TO_DONORS">(
     "CONSOLIDATED"
   );
+  const [showEditor, setShowEditor] = useState(false);
+  const [customizationPreview, setCustomizationPreview] = useState<string | null>(null);
 
   const customizations = CUSTOMIZATION_BADGES.filter(
     (b) => product[b.key as keyof Product]
@@ -281,6 +286,25 @@ export function ProductDetail({ product }: { product: Product }) {
               הורד תבנית Excel להזמנה
             </a>
 
+            {/* Customization CTA */}
+            {product.isCustomizable && (
+              <button
+                onClick={() => setShowEditor(true)}
+                className="flex items-center justify-center gap-2 w-full py-3 border-2 border-[#B08D57] text-[#B08D57] text-sm tracking-widest uppercase hover:bg-[#B08D57] hover:text-white transition-colors rounded-sm font-medium"
+              >
+                <Palette size={16} />
+                עיצוב אישי — לוגו / טקסט
+              </button>
+            )}
+
+            {/* Preview after customization */}
+            {customizationPreview && (
+              <div className="rounded-lg overflow-hidden border border-[#B08D57]/30">
+                <p className="text-xs text-center text-[#B08D57] py-1.5 bg-[#FAF8F5]">תצוגה מקדימה של העיצוב</p>
+                <img src={customizationPreview} alt="תצוגה מקדימה" className="w-full" />
+              </div>
+            )}
+
             {/* CTA */}
             <Link
               href={`/quote?product=${product.id}`}
@@ -289,6 +313,20 @@ export function ProductDetail({ product }: { product: Product }) {
             >
               בקשת הצעת מחיר
             </Link>
+
+            {/* Customization Editor Modal */}
+            {showEditor && (
+              <CustomizationEditor
+                productImage={selectedImage?.url ?? ""}
+                productName={product.name}
+                fonts={product.customFonts ?? []}
+                onSave={({ preview }) => {
+                  setCustomizationPreview(preview);
+                  setShowEditor(false);
+                }}
+                onClose={() => setShowEditor(false)}
+              />
+            )}
 
             {/* Description */}
             {product.description && (
