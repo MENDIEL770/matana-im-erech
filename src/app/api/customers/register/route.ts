@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     const directDebit = toBool(directDebitInterest);
 
     await resend.emails.send({
-      from: "מתנה עם ערך <noreply@matana.co.il>",
+      from: "מתנה עם ערך <onboarding@resend.dev>",
       to: rest.email,
       subject: "ברוכים הבאים למשפחת מתנה עם ערך! 🎁",
       html: `
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     // Notify admin if direct debit interest
     if (directDebit) {
       await resend.emails.send({
-        from: "מתנה עם ערך <noreply@matana.co.il>",
+        from: "מתנה עם ערך <onboarding@resend.dev>",
         to: "admin@matana.co.il",
         subject: `לקוח חדש מעוניין בהוראת קבע — ${rest.shaliachName}`,
         html: `<p>לקוח חדש נרשם ומעוניין בהוראת קבע (3% הנחה):</p>

@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "מתנה עם ערך <noreply@matana.co.il>",
+        from: "מתנה עם ערך <onboarding@resend.dev>",
         to: user.email,
         subject: "איפוס סיסמה — מתנה עם ערך",
         html: `
