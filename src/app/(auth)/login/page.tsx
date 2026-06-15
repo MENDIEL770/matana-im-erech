@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,7 +35,12 @@ export default function LoginPage() {
 
   return (
     <>
-      <h2 className="font-['Ploni'] text-2xl font-light text-[#2E2A26] mb-8 text-center">כניסה</h2>
+      <h2 className="font-['Ploni'] text-2xl font-light text-[#2E2A26] mb-6 text-center">כניסה</h2>
+      {registered && (
+        <div className="bg-green-50 border border-green-200 rounded px-4 py-3 mb-6 text-center">
+          <p className="text-xs text-green-700 font-medium">✅ נרשמת בהצלחה! פרטי החשבון נשלחו לאימייל שלך</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -43,7 +51,10 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="block text-xs tracking-widest text-[#6B6763] uppercase mb-2">סיסמה</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs tracking-widest text-[#6B6763] uppercase">סיסמה</label>
+            <Link href="/forgot-password" className="text-xs text-[#B08D57] hover:underline">שכחתי סיסמה</Link>
+          </div>
           <input
             name="password" type="password" required placeholder="••••••••"
             className="w-full px-4 py-3 text-sm border border-[#ECE8E2] bg-[#FAF8F5] text-[#2E2A26] placeholder:text-[#CFC5B8] focus:outline-none focus:border-[#B08D57] transition-colors"
@@ -65,5 +76,13 @@ export default function LoginPage() {
         <Link href="/register" className="text-[#B08D57] hover:underline">הרשמה</Link>
       </p>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

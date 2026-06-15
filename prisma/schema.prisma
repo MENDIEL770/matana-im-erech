@@ -66,6 +66,14 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+}
+
 // ==================== CUSTOMERS ====================
 
 model Customer {
@@ -86,6 +94,9 @@ model Customer {
   isActive        Boolean        @default(true)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+
+  marketingConsent    Boolean        @default(false)
+  directDebitInterest Boolean        @default(false)
 
   // Dokopoint sync
   dokopointCustomerId Int?
