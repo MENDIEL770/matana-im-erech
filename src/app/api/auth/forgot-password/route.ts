@@ -23,8 +23,12 @@ export async function POST(req: NextRequest) {
 
   console.log("[ForgotPassword] user found:", user ? user.email : "לא נמצא");
 
-  // Always return success to prevent enumeration
-  if (!user) return NextResponse.json({ success: true });
+  if (!user) {
+    return NextResponse.json(
+      { error: isEmail ? "כתובת האימייל אינה רשומה במערכת" : "מספר הטלפון אינו רשום במערכת" },
+      { status: 404 }
+    );
+  }
 
   // Delete old tokens for this user
   await prisma.passwordResetToken.deleteMany({ where: { identifier: user.email } });
@@ -76,8 +80,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ success: true });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
     console.error("[ForgotPassword] Unexpected error:", e);
-    return NextResponse.json({ error: "שגיאה פנימית", detail: msg }, { status: 500 });
+    return NextResponse.json({ error: "שגיאה פנימית" }, { status: 500 });
   }
 }
