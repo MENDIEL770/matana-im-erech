@@ -11,8 +11,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "פרטים חסרים או סיסמה קצרה מדי" }, { status: 400 });
   }
 
+  // Tokens are stored by email — if user entered phone, resolve to email first
+  let emailIdentifier = identifier;
+  if (!identifier.includes("@")) {
+    const user = await prisma.user.findFirst({
+      where: { customer: { phone: identifier } },
+    });
+    if (!user) return NextResponse.json({ error: "קוד שגוי" }, { status: 400 });
+    emailIdentifier = user.email;
+  }
+
   const record = await prisma.passwordResetToken.findFirst({
-    where: { identifier, token },
+    where: { identifier: emailIdentifier, token },
   });
 
   if (!record) {
@@ -25,7 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   const hashed = await bcrypt.hash(newPassword, 12);
-  await prisma.user.update({ where: { email: identifier }, data: { password: hashed } });
+  await prisma.user.update({ where: { email: emailIdentifier }, data: { password: hashed } });
   await prisma.passwordResetToken.delete({ where: { id: record.id } });
 
   return NextResponse.json({ success: true });
