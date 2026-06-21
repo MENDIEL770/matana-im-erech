@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Pencil, Trash2, X, Check, Tag, ChevronDown, ChevronLeft, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Tag, ChevronDown, ChevronLeft, FolderOpen, ChevronUp } from "lucide-react";
 
 interface Category {
   id: string;
@@ -93,6 +93,18 @@ export default function CategoriesPage() {
     load();
   };
 
+  const moveItem = async (items: Category[], index: number, direction: -1 | 1) => {
+    const swapIndex = index + direction;
+    if (swapIndex < 0 || swapIndex >= items.length) return;
+    const a = items[index];
+    const b = items[swapIndex];
+    await Promise.all([
+      fetch(`/api/categories/${a.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order: b.order }) }),
+      fetch(`/api/categories/${b.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order: a.order }) }),
+    ]);
+    load();
+  };
+
   const toggle = (id: string) => setExpanded(prev => {
     const n = new Set(prev);
     n.has(id) ? n.delete(id) : n.add(id);
@@ -176,10 +188,14 @@ export default function CategoriesPage() {
       ) : (
         <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
           {tree.map((main, i) => (
-            <div key={main.id} className={i > 0 ? "border-t border-gray-100" : ""}>
+            <div key={main.id} className={i > 0 ? "border-t border-gray-100" : ""} draggable={false}>
               {/* Main category row */}
               <div className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors group">
                 <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <button onClick={() => moveItem(tree, i, -1)} disabled={i === 0} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronUp size={13} /></button>
+                    <button onClick={() => moveItem(tree, i, 1)} disabled={i === tree.length - 1} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronDown size={13} /></button>
+                  </div>
                   <button onClick={() => toggle(main.id)} className="text-gray-400 hover:text-gray-600">
                     {expanded.has(main.id) ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
                   </button>
@@ -207,10 +223,14 @@ export default function CategoriesPage() {
               {/* Sub-categories */}
               {expanded.has(main.id) && main.children && main.children.length > 0 && (
                 <div className="border-t border-gray-50">
-                  {main.children.map((sub) => (
+                  {main.children.map((sub, si) => (
                     <div key={sub.id}
                       className="flex items-center justify-between px-5 py-3 pl-12 bg-gray-50/50 hover:bg-gray-50 transition-colors border-t border-gray-100 first:border-t-0">
                       <div className="flex items-center gap-3 pr-8">
+                        <div className="flex flex-col">
+                          <button onClick={() => moveItem(main.children!, si, -1)} disabled={si === 0} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronUp size={12} /></button>
+                          <button onClick={() => moveItem(main.children!, si, 1)} disabled={si === main.children!.length - 1} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronDown size={12} /></button>
+                        </div>
                         <div className="w-px h-4 bg-gray-300" />
                         <Tag size={13} className="text-gray-400" />
                         <div>
