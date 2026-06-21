@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, Search, Package } from "lucide-react";
+import { BulkImportButton } from "@/components/admin/BulkImportButton";
 
 async function getProducts() {
   try {
@@ -34,12 +35,15 @@ export default async function ProductsPage() {
           <h1 className="text-2xl font-bold text-[#0F2747]">מוצרים</h1>
           <p className="text-sm text-gray-500">{products.length} מוצרים במערכת</p>
         </div>
-        <Link href="/admin/products/new">
-          <Button variant="gold">
-            <Plus size={16} />
-            מוצר חדש
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <BulkImportButton />
+          <Link href="/admin/products/new">
+            <Button variant="gold">
+              <Plus size={16} />
+              מוצר חדש
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
