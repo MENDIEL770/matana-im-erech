@@ -1,52 +1,42 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const dynamic = "force-dynamic";
+
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
-  const coupon = await prisma.coupon.findUnique({ where: { id } });
-  if (!coupon) return NextResponse.json({ error: "קופון לא נמצא" }, { status: 404 });
+  const body = await req.json();
+
+  const coupon = await prisma.coupon.update({
+    where: { id },
+    data: {
+      ...(body.code !== undefined && { code: body.code.toUpperCase().trim() }),
+      ...(body.description !== undefined && { description: body.description || null }),
+      ...(body.type !== undefined && { type: body.type }),
+      ...(body.value !== undefined && { value: Number(body.value) }),
+      ...(body.minOrderAmount !== undefined && { minOrderAmount: body.minOrderAmount ? Number(body.minOrderAmount) : null }),
+      ...(body.expiresAt !== undefined && { expiresAt: body.expiresAt ? new Date(body.expiresAt) : null }),
+      ...(body.maxUses !== undefined && { maxUses: body.maxUses ? Number(body.maxUses) : null }),
+      ...(body.isActive !== undefined && { isActive: body.isActive }),
+      ...(body.agentId !== undefined && { agentId: body.agentId || null }),
+      ...(body.agentCommissionType !== undefined && { agentCommissionType: body.agentCommissionType }),
+      ...(body.agentCommissionValue !== undefined && { agentCommissionValue: Number(body.agentCommissionValue) }),
+    },
+    include: { agent: { select: { id: true, name: true } } },
+  });
   return NextResponse.json(coupon);
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
-  try {
-    const body = await req.json();
-
-    if (body.code) {
-      const conflict = await prisma.coupon.findFirst({
-        where: { code: body.code.toUpperCase(), NOT: { id } },
-      });
-      if (conflict) {
-        return NextResponse.json({ error: "קוד קופון זה כבר קיים" }, { status: 409 });
-      }
-      body.code = body.code.toUpperCase();
-    }
-
-    const coupon = await prisma.coupon.update({
-      where: { id },
-      data: {
-        ...body,
-        expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
-      },
-    });
-    return NextResponse.json(coupon);
-  } catch {
-    return NextResponse.json({ error: "שגיאה בעדכון קופון" }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
+  await prisma.couponUsage.deleteMany({ where: { couponId: id } });
   await prisma.coupon.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ ok: true });
 }

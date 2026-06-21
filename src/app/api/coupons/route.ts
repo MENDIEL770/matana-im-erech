@@ -1,65 +1,48 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  try {
-    const coupons = await prisma.coupon.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+  const session = await auth();
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    return NextResponse.json(coupons);
-  } catch (error) {
-    console.error("GET /api/coupons error:", error);
-    return NextResponse.json({ error: "שגיאה בטעינת קופונים" }, { status: 500 });
-  }
+  const coupons = await prisma.coupon.findMany({
+    include: { agent: { select: { id: true, name: true } }, _count: { select: { usages: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+  return NextResponse.json(coupons);
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const {
-      code,
-      type,
-      value,
-      minOrderAmount,
-      expiresAt,
-      maxUses,
-      maxUsesPerUser,
-      agentId,
-      holiday,
-      isActive,
-    } = body;
+export async function POST(req: Request) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    if (!code || !type || value === undefined) {
-      return NextResponse.json({ error: "קוד, סוג וערך הם שדות חובה" }, { status: 400 });
-    }
-    if (value <= 0) {
-      return NextResponse.json({ error: "ערך הקופון חייב להיות גדול מאפס" }, { status: 400 });
-    }
+  const body = await req.json();
+  const { code, description, type, value, minOrderAmount, expiresAt, maxUses, isActive,
+    agentId, agentCommissionType, agentCommissionValue } = body;
 
-    const existing = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
-    if (existing) {
-      return NextResponse.json({ error: "קוד קופון זה כבר קיים" }, { status: 409 });
-    }
+  if (!code || value == null) return NextResponse.json({ error: "קוד וערך חובה" }, { status: 400 });
 
-    const coupon = await prisma.coupon.create({
-      data: {
-        code: code.toUpperCase(),
-        type,
-        value,
-        minOrderAmount: minOrderAmount ?? null,
-        expiresAt: expiresAt ? new Date(expiresAt) : null,
-        maxUses: maxUses ?? null,
-        maxUsesPerUser: maxUsesPerUser ?? null,
-        agentId: agentId ?? null,
-        holiday: holiday ?? null,
-        isActive: isActive ?? true,
-      },
-    });
+  const existing = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
+  if (existing) return NextResponse.json({ error: "קוד קופון כבר קיים" }, { status: 400 });
 
-    return NextResponse.json(coupon, { status: 201 });
-  } catch (error) {
-    console.error("POST /api/coupons error:", error);
-    return NextResponse.json({ error: "שגיאה ביצירת קופון" }, { status: 500 });
-  }
+  const coupon = await prisma.coupon.create({
+    data: {
+      code: code.toUpperCase().trim(),
+      description: description || null,
+      type: type ?? "PERCENT",
+      value: Number(value),
+      minOrderAmount: minOrderAmount ? Number(minOrderAmount) : null,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      maxUses: maxUses ? Number(maxUses) : null,
+      isActive: isActive ?? true,
+      agentId: agentId || null,
+      agentCommissionType: agentCommissionType ?? "PERCENT",
+      agentCommissionValue: Number(agentCommissionValue ?? 0),
+    },
+    include: { agent: { select: { id: true, name: true } } },
+  });
+  return NextResponse.json(coupon);
 }

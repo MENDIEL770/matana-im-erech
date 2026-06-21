@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Tag, Loader2 } from "lucide-react";
 
 function QuoteForm() {
   const searchParams = useSearchParams();
@@ -12,6 +12,23 @@ function QuoteForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponResult, setCouponResult] = useState<{ discountAmount: number; type: string; value: number; description?: string; agentCommission?: number } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true); setCouponError(null); setCouponResult(null);
+    const res = await fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: couponCode }),
+    });
+    const data = await res.json();
+    setCouponLoading(false);
+    if (!res.ok) { setCouponError(data.error); } else { setCouponResult(data); }
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,9 +46,11 @@ function QuoteForm() {
           contactName: fd.get("contactName"),
           phone: fd.get("phone"),
           email: fd.get("email"),
+          couponCode: couponResult ? couponCode : undefined,
           notes: [
             productId ? `מוצר: ${productId}` : "",
             fd.get("productInterest") ? `עניין במוצר: ${fd.get("productInterest")}` : "",
+            couponResult ? `קופון: ${couponCode}` : "",
             fd.get("message") ? `הודעה: ${fd.get("message")}` : "",
           ]
             .filter(Boolean)
@@ -135,6 +154,38 @@ function QuoteForm() {
           className="w-full px-4 py-3 text-sm border border-[#ECE8E2] rounded-xl bg-white focus:outline-none focus:border-[#B08D57] transition-colors"
           placeholder="מנורת חנוכה עם לוגו, 100 יחידות..."
         />
+      </div>
+
+      {/* Coupon field */}
+      <div>
+        <label className="block text-sm font-medium text-[#2E2A26] mb-1.5">
+          קוד קופון (אם יש)
+        </label>
+        <div className="flex gap-2">
+          <input
+            value={couponCode}
+            onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponResult(null); setCouponError(null); }}
+            onKeyDown={e => e.key === "Enter" && (e.preventDefault(), validateCoupon())}
+            placeholder="הכנס קוד קופון"
+            className="flex-1 px-4 py-3 text-sm border border-[#ECE8E2] rounded-xl bg-white focus:outline-none focus:border-[#B08D57] transition-colors font-mono"
+            dir="ltr"
+          />
+          <button type="button" onClick={validateCoupon} disabled={!couponCode.trim() || couponLoading}
+            className="px-4 py-3 bg-[#2E2A26] text-white text-sm rounded-xl hover:bg-[#B08D57] transition-colors disabled:opacity-40 flex items-center gap-2">
+            {couponLoading ? <Loader2 size={14} className="animate-spin" /> : <Tag size={14} />}
+            אמת
+          </button>
+        </div>
+        {couponError && <p className="text-xs text-red-500 mt-1.5">{couponError}</p>}
+        {couponResult && (
+          <div className="mt-2 flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
+            <CheckCircle2 size={15} className="text-green-600 shrink-0" />
+            <p className="text-xs text-green-700 font-medium">
+              קופון תקף! הנחה של {couponResult.type === "PERCENT" ? `${couponResult.value}%` : `₪${couponResult.value}`}
+              {couponResult.description ? ` — ${couponResult.description}` : ""}
+            </p>
+          </div>
+        )}
       </div>
 
       <div>
