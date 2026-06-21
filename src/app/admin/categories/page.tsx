@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Pencil, Trash2, X, Check, Tag, ChevronDown, ChevronLeft, FolderOpen, ChevronUp } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Plus, Pencil, Trash2, X, Check, Tag, ChevronDown, ChevronLeft, FolderOpen, GripVertical } from "lucide-react";
 
 interface Category {
   id: string;
@@ -24,6 +24,8 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragItem = useRef<{ id: string; parentId: string | null; index: number; items: Category[] } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -93,23 +95,51 @@ export default function CategoriesPage() {
     load();
   };
 
-  const moveItem = async (items: Category[], index: number, direction: -1 | 1) => {
-    const swapIndex = index + direction;
-    if (swapIndex < 0 || swapIndex >= items.length) return;
-    const a = items[index];
-    const b = items[swapIndex];
-    await Promise.all([
-      fetch(`/api/categories/${a.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order: b.order }) }),
-      fetch(`/api/categories/${b.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ order: a.order }) }),
-    ]);
-    load();
-  };
-
   const toggle = (id: string) => setExpanded(prev => {
     const n = new Set(prev);
     n.has(id) ? n.delete(id) : n.add(id);
     return n;
   });
+
+  const saveOrder = async (items: Category[]) => {
+    await Promise.all(
+      items.map((item, idx) =>
+        fetch(`/api/categories/${item.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: idx }),
+        })
+      )
+    );
+    load();
+  };
+
+  const onDragStart = (id: string, parentId: string | null, index: number, items: Category[]) => {
+    dragItem.current = { id, parentId, index, items };
+  };
+
+  const onDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    setDragOverId(targetId);
+  };
+
+  const onDrop = (e: React.DragEvent, targetIndex: number, items: Category[]) => {
+    e.preventDefault();
+    setDragOverId(null);
+    if (!dragItem.current) return;
+    const from = dragItem.current.index;
+    if (from === targetIndex) return;
+    const reordered = [...items];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(targetIndex, 0, moved);
+    saveOrder(reordered);
+    dragItem.current = null;
+  };
+
+  const onDragEnd = () => {
+    setDragOverId(null);
+    dragItem.current = null;
+  };
 
   const mainCategories = flat.filter(c => !c.parentId);
 
@@ -157,11 +187,6 @@ export default function CategoriesPage() {
                 className="w-full border border-gray-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#B08D57]"
                 placeholder="תיאור קצר" />
             </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">סדר תצוגה</label>
-              <input type="number" value={form.order} onChange={(e) => setForm(f => ({ ...f, order: e.target.value }))}
-                className="w-full border border-gray-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#B08D57]" />
-            </div>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <div className="flex gap-2">
@@ -188,14 +213,19 @@ export default function CategoriesPage() {
       ) : (
         <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
           {tree.map((main, i) => (
-            <div key={main.id} className={i > 0 ? "border-t border-gray-100" : ""} draggable={false}>
+            <div
+              key={main.id}
+              draggable
+              onDragStart={() => onDragStart(main.id, null, i, tree)}
+              onDragOver={(e) => onDragOver(e, main.id)}
+              onDrop={(e) => onDrop(e, i, tree)}
+              onDragEnd={onDragEnd}
+              className={`${i > 0 ? "border-t border-gray-100" : ""} ${dragOverId === main.id ? "bg-[#FAF8F5] border-[#B08D57]" : ""} transition-colors`}
+            >
               {/* Main category row */}
               <div className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors group">
                 <div className="flex items-center gap-3">
-                  <div className="flex flex-col">
-                    <button onClick={() => moveItem(tree, i, -1)} disabled={i === 0} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronUp size={13} /></button>
-                    <button onClick={() => moveItem(tree, i, 1)} disabled={i === tree.length - 1} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronDown size={13} /></button>
-                  </div>
+                  <GripVertical size={16} className="text-gray-300 cursor-grab active:cursor-grabbing shrink-0" />
                   <button onClick={() => toggle(main.id)} className="text-gray-400 hover:text-gray-600">
                     {expanded.has(main.id) ? <ChevronDown size={16} /> : <ChevronLeft size={16} />}
                   </button>
@@ -224,13 +254,17 @@ export default function CategoriesPage() {
               {expanded.has(main.id) && main.children && main.children.length > 0 && (
                 <div className="border-t border-gray-50">
                   {main.children.map((sub, si) => (
-                    <div key={sub.id}
-                      className="flex items-center justify-between px-5 py-3 pl-12 bg-gray-50/50 hover:bg-gray-50 transition-colors border-t border-gray-100 first:border-t-0">
+                    <div
+                      key={sub.id}
+                      draggable
+                      onDragStart={(e) => { e.stopPropagation(); onDragStart(sub.id, main.id, si, main.children!); }}
+                      onDragOver={(e) => { e.stopPropagation(); onDragOver(e, sub.id); }}
+                      onDrop={(e) => { e.stopPropagation(); onDrop(e, si, main.children!); }}
+                      onDragEnd={onDragEnd}
+                      className={`flex items-center justify-between px-5 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors border-t border-gray-100 first:border-t-0 ${dragOverId === sub.id ? "bg-[#FAF8F5]" : ""}`}
+                    >
                       <div className="flex items-center gap-3 pr-8">
-                        <div className="flex flex-col">
-                          <button onClick={() => moveItem(main.children!, si, -1)} disabled={si === 0} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronUp size={12} /></button>
-                          <button onClick={() => moveItem(main.children!, si, 1)} disabled={si === main.children!.length - 1} className="text-gray-300 hover:text-[#B08D57] disabled:opacity-20 transition-colors"><ChevronDown size={12} /></button>
-                        </div>
+                        <GripVertical size={14} className="text-gray-300 cursor-grab active:cursor-grabbing shrink-0" />
                         <div className="w-px h-4 bg-gray-300" />
                         <Tag size={13} className="text-gray-400" />
                         <div>
