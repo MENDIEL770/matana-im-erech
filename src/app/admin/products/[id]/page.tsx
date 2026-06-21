@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { FontUploader } from "@/components/admin/FontUploader";
+import { BundleEditor } from "@/components/admin/BundleEditor";
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -61,6 +62,11 @@ export default async function EditProductPage({
           </button>
         </Link>
       </div>
+
+      {/* Bundle Editor — מוצג רק אם המוצר הוא מארז */}
+      {product.isBundle && (
+        <BundleEditor productId={product.id} />
+      )}
 
       {/* Main layout: Left 60% form | Right 40% images */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">

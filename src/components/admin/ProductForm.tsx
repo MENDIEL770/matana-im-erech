@@ -67,7 +67,7 @@ export function ProductForm({ product }: { product?: any }) {
     // Boolean fields (checkboxes)
     const boolFields = [
       "hasEmbroidery","hasEngraving","hasLogoprint","hasEmbossing","hasPersonal",
-      "isFeatured","isNew","isActive","isCustomizable",
+      "isFeatured","isNew","isActive","isCustomizable","isBundle","isBundlable",
     ];
     // Nullable enum fields
     const nullableEnums = ["tag","categoryId","holidays"];
@@ -220,6 +220,18 @@ export function ProductForm({ product }: { product?: any }) {
             <div className="flex items-center gap-3">
               <input type="checkbox" name="isCustomizable" id="isCustomizable" defaultChecked={product?.isCustomizable} className="w-4 h-4 accent-[#B08D57]" />
               <label htmlFor="isCustomizable" className="text-sm text-gray-700">אפשר עיצוב אישי (לוגו / טקסט / ברקמה)</label>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4 mt-2 space-y-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">מארז</p>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" name="isBundle" id="isBundle" defaultChecked={product?.isBundle} className="w-4 h-4 accent-[#B08D57]" />
+                <label htmlFor="isBundle" className="text-sm text-gray-700">מוצר זה הוא <strong>מארז</strong> — ניתן להוסיף אליו מוצרים</label>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" name="isBundlable" id="isBundlable" defaultChecked={product?.isBundlable} className="w-4 h-4 accent-[#B08D57]" />
+                <label htmlFor="isBundlable" className="text-sm text-gray-700">מוצר זה <strong>מתאים למארז</strong> — ניתן להוסיפו למארזים אחרים</label>
+              </div>
             </div>
           </div>
         </Card>

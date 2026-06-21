@@ -168,6 +168,9 @@ model Product {
   isCustomizable   Boolean         @default(false)
   customFonts      Json?
 
+  isBundle         Boolean         @default(false)
+  isBundlable      Boolean         @default(false)
+
   stock            Int             @default(0)
   minStock         Int             @default(5)
   warehouseLocation String?
@@ -198,6 +201,19 @@ model Product {
   quoteItems       QuoteItem[]
   orderItems       OrderItem[]
   inventoryLogs    InventoryLog[]
+  bundleItems      BundleItem[]    @relation("BundleParent")
+  bundleOf         BundleItem[]    @relation("BundleChild")
+}
+
+model BundleItem {
+  id        String   @id @default(cuid())
+  bundleId  String
+  bundle    Product  @relation("BundleParent", fields: [bundleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation("BundleChild", fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 enum ProductType {

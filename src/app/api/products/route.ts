@@ -39,6 +39,8 @@ const productSchema = z.object({
   isFeatured: z.coerce.boolean().default(false),
   isActive: z.coerce.boolean().default(true),
   isCustomizable: z.coerce.boolean().default(false),
+  isBundle: z.coerce.boolean().default(false),
+  isBundlable: z.coerce.boolean().default(false),
   costs: z.array(z.object({
     label: z.string(),
     amount: z.coerce.number(),
