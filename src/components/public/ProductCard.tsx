@@ -48,9 +48,9 @@ export function ProductCard(props: ProductCardProps) {
   const priceRange = formatPriceRange(props);
 
   return (
-    <ScrollReveal variant="up" duration={0.5}>
-    <Link href={`/product/${props.id}`} className="group block">
-      <article className="bg-white border border-[#ECE8E2] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(46,42,38,0.10)]" style={{ borderRadius: "16px" }}>
+    <ScrollReveal variant="up" duration={0.5} className="h-full">
+    <Link href={`/product/${props.id}`} className="group block h-full">
+      <article className="bg-white border border-[#ECE8E2] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(46,42,38,0.10)] flex flex-col h-full" style={{ borderRadius: "16px" }}>
         {/* Image */}
         <div className="relative overflow-hidden bg-[#FAF8F5]" style={{ aspectRatio: "1", borderRadius: "16px 16px 0 0" }}>
           {primary ? (
@@ -96,7 +96,7 @@ export function ProductCard(props: ProductCardProps) {
         </div>
 
         {/* Info */}
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-3 flex flex-col flex-1">
           <h3 className="font-['Ploni'] text-[#2E2A26] font-medium text-base leading-snug line-clamp-2">
             {props.name}
           </h3>
@@ -114,7 +114,7 @@ export function ProductCard(props: ProductCardProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center justify-between pt-1 mt-auto">
             {priceRange ? (
               <span className="text-sm font-semibold text-[#B08D57]">{priceRange}</span>
             ) : (
