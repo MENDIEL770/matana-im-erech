@@ -209,6 +209,15 @@ export function ProductForm({ product }: { product?: any }) {
                 { value: "PREMIUM", label: "פרימיום" },
               ]}
             />
+            <Select
+              label="אופן הזמנה"
+              name="orderMode"
+              defaultValue={product?.orderMode ?? "IMMEDIATE"}
+              options={[
+                { value: "IMMEDIATE", label: "⚡ הזמנה מיידית — הלקוח מזמין באתר ומקבל" },
+                { value: "CONTACT_REQUIRED", label: "📞 תיאום מראש — ניצור קשר להשלמת ההזמנה" },
+              ]}
+            />
             <div className="flex items-center gap-3">
               <input type="checkbox" name="isFeatured" id="isFeatured" defaultChecked={product?.isFeatured} className="w-4 h-4 accent-[#B08D57]" />
               <label htmlFor="isFeatured" className="text-sm text-gray-700">מוצר מומלץ בדף הבית</label>

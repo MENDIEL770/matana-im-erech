@@ -36,6 +36,7 @@ const productSchema = z.object({
   leadTimeDays: z.coerce.number().optional(),
   originCountry: z.string().optional(),
   tag: z.enum(["NEW", "RECOMMENDED", "POPULAR", "PREMIUM"]).optional().nullable(),
+  orderMode: z.enum(["IMMEDIATE", "CONTACT_REQUIRED"]).default("IMMEDIATE"),
   isFeatured: z.coerce.boolean().default(false),
   isActive: z.coerce.boolean().default(true),
   isCustomizable: z.coerce.boolean().default(false),

@@ -182,6 +182,7 @@ model Product {
   originCountry    String?
 
   tag              ProductTag?
+  orderMode        OrderMode       @default(IMMEDIATE)
   holidays         String[]
   isFeatured       Boolean         @default(false)
   isNew            Boolean         @default(false)
@@ -228,6 +229,11 @@ enum ProductTag {
   RECOMMENDED
   POPULAR
   PREMIUM
+}
+
+enum OrderMode {
+  IMMEDIATE
+  CONTACT_REQUIRED
 }
 
 model ProductImage {

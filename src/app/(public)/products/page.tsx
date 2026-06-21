@@ -43,6 +43,7 @@ async function ProductsGrid({ categoryId }: { categoryId?: string }) {
           name={product.name}
           shortDescription={product.shortDescription}
           tag={product.tag}
+          orderMode={product.orderMode}
           regularPrice={Number(product.regularPrice)}
           price20={product.price20 ? Number(product.price20) : null}
           price500={product.price500 ? Number(product.price500) : null}

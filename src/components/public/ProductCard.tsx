@@ -17,6 +17,7 @@ interface ProductCardProps {
   name: string;
   shortDescription?: string | null;
   tag?: string | null;
+  orderMode?: string | null;
   regularPrice: number;
   price20?: number | null;
   price500?: number | null;
@@ -104,6 +105,13 @@ export function ProductCard(props: ProductCardProps) {
             <p className="text-xs text-[#6B6763] line-clamp-2 leading-relaxed">
               {props.shortDescription}
             </p>
+          )}
+
+          {props.orderMode === "CONTACT_REQUIRED" && (
+            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5">
+              <span className="text-xs">📞</span>
+              <span className="text-xs text-amber-700 font-medium">בהזמנה מראש — ניצור קשר</span>
+            </div>
           )}
 
           <div className="flex items-center justify-between pt-1">

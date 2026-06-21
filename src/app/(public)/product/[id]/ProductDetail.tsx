@@ -43,6 +43,7 @@ interface Product {
   hasPersonal: boolean;
   isCustomizable: boolean;
   customFonts?: { name: string; url: string }[] | null;
+  orderMode?: string | null;
   tag?: string | null;
   images: ProductImage[];
   fields: ProductField[];
@@ -285,6 +286,22 @@ export function ProductDetail({ product }: { product: Product }) {
               <Download size={16} className="group-hover:text-[#B08D57] transition-colors" />
               הורד תבנית Excel להזמנה
             </a>
+
+            {/* Order mode badge */}
+            {product.orderMode === "CONTACT_REQUIRED" ? (
+              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-sm px-4 py-3">
+                <span className="text-xl mt-0.5">📞</span>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">הזמנה בתיאום מראש</p>
+                  <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">מוצר זה אינו מוחזק במלאי קבוע. לאחר שליחת הבקשה, נציג שלנו יצור איתך קשר להשלמת ההזמנה ואישור פרטים.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-sm px-4 py-2.5">
+                <span className="text-base">⚡</span>
+                <p className="text-sm text-green-700 font-medium">הזמנה מיידית — ניתן להזמין עכשיו באתר</p>
+              </div>
+            )}
 
             {/* Customization CTA */}
             {product.isCustomizable && (
