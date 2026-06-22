@@ -4,10 +4,11 @@ import { Suspense } from "react";
 import { ProductCard } from "@/components/public/ProductCard";
 import { CategoryTree } from "@/components/public/CategoryTree";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { PriceRangeFilter } from "@/components/public/PriceRangeFilter";
 
 export const dynamic = "force-dynamic";
 
-async function ProductsGrid({ categoryId, q }: { categoryId?: string; q?: string }) {
+async function ProductsGrid({ categoryId, q, minPrice, maxPrice }: { categoryId?: string; q?: string; minPrice?: number; maxPrice?: number }) {
   // If categoryId is a main category, include all its sub-categories
   const subCategoryIds = categoryId
     ? (await prisma.category.findMany({ where: { parentId: categoryId }, select: { id: true } })).map(c => c.id)
@@ -25,6 +26,12 @@ async function ProductsGrid({ categoryId, q }: { categoryId?: string; q?: string
           { shortDescription: { contains: q, mode: "insensitive" } },
           { sku: { contains: q, mode: "insensitive" } },
         ],
+      } : {}),
+      ...(minPrice != null || maxPrice != null ? {
+        regularPrice: {
+          ...(minPrice != null ? { gte: minPrice } : {}),
+          ...(maxPrice != null ? { lte: maxPrice } : {}),
+        },
       } : {}),
     },
     include: { images: { orderBy: { order: "asc" } } },
@@ -65,9 +72,18 @@ async function ProductsGrid({ categoryId, q }: { categoryId?: string; q?: string
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; minPrice?: string; maxPrice?: string }>;
 }) {
-  const { category, q } = await searchParams;
+  const { category, q, minPrice, maxPrice } = await searchParams;
+
+  // Get global price range for the slider
+  const priceRange = await prisma.product.aggregate({
+    where: { isActive: true },
+    _min: { regularPrice: true },
+    _max: { regularPrice: true },
+  });
+  const globalMin = Math.floor(Number(priceRange._min.regularPrice ?? 0));
+  const globalMax = Math.ceil(Number(priceRange._max.regularPrice ?? 1000));
 
   // Fetch tree for sidebar
   const tree = await prisma.category.findMany({
@@ -118,8 +134,13 @@ export default async function ProductsPage({
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-10" dir="rtl">
           {/* Sidebar */}
-          <aside className="hidden lg:block lg:w-56 shrink-0">
+          <aside className="hidden lg:block lg:w-56 shrink-0 space-y-8">
             <CategoryTree tree={tree} activeId={category} />
+            <div className="border-t border-[#ECE8E2] pt-6">
+              <Suspense>
+                <PriceRangeFilter min={globalMin} max={globalMax} />
+              </Suspense>
+            </div>
           </aside>
 
           {/* Product grid */}
@@ -137,7 +158,12 @@ export default async function ProductsPage({
               <Suspense fallback={Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="bg-white border border-[#ECE8E2] rounded-2xl animate-pulse" style={{ aspectRatio: "0.85" }} />
               ))}>
-                <ProductsGrid categoryId={category} q={q} />
+                <ProductsGrid
+                  categoryId={category}
+                  q={q}
+                  minPrice={minPrice ? Number(minPrice) : undefined}
+                  maxPrice={maxPrice ? Number(maxPrice) : undefined}
+                />
               </Suspense>
             </div>
           </main>

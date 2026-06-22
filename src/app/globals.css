@@ -134,6 +134,11 @@ body {
   .admin-grid-4 { grid-template-columns: 1fr 1fr !important; }
 }
 
+/* ─── Price range slider thumbs ──────────────────────────── */
+.price-thumb { -webkit-appearance: none; appearance: none; pointer-events: all; }
+.price-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; cursor: pointer; }
+.price-thumb::-moz-range-thumb { width: 18px; height: 18px; border: none; background: transparent; cursor: pointer; }
+
 /* ─── Admin Sidebar ──────────────────────────────────────── */
 .admin-nav-link {
   transition: all 0.15s ease;
