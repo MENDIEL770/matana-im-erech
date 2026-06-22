@@ -22,10 +22,16 @@ interface Coupon {
   _count: { usages: number };
 }
 
-const empty = {
-  code: "", description: "", type: "PERCENT" as const, value: "",
+type FormState = {
+  code: string; description: string; type: "PERCENT" | "FIXED"; value: string;
+  minOrderAmount: string; expiresAt: string; maxUses: string; isActive: boolean;
+  agentId: string; agentCommissionType: "PERCENT" | "FIXED"; agentCommissionValue: string;
+};
+
+const empty: FormState = {
+  code: "", description: "", type: "PERCENT", value: "",
   minOrderAmount: "", expiresAt: "", maxUses: "", isActive: true,
-  agentId: "", agentCommissionType: "PERCENT" as const, agentCommissionValue: "",
+  agentId: "", agentCommissionType: "PERCENT", agentCommissionValue: "",
 };
 
 export default function CouponsPage() {
@@ -225,7 +231,7 @@ export default function CouponsPage() {
           <p className="text-gray-500 text-sm">אין קופונים עדיין</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+        <div className="overflow-x-auto"><div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
@@ -283,6 +289,7 @@ export default function CouponsPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </div>
       )}
     </div>

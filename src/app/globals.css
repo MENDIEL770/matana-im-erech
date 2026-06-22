@@ -116,6 +116,24 @@ body {
   margin: 0 auto;
 }
 
+/* ─── Mobile: Admin tables scroll horizontally ───────────── */
+@media (max-width: 1024px) {
+  div:has(> table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 520px;
+  }
+}
+
+/* ─── Mobile: Admin grid forms stack ─────────────────────── */
+@media (max-width: 640px) {
+  .admin-grid-2 { grid-template-columns: 1fr !important; }
+  .admin-grid-3 { grid-template-columns: 1fr !important; }
+  .admin-grid-4 { grid-template-columns: 1fr 1fr !important; }
+}
+
 /* ─── Admin Sidebar ──────────────────────────────────────── */
 .admin-nav-link {
   transition: all 0.15s ease;
