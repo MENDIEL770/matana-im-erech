@@ -3,10 +3,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ProductCard } from "@/components/public/ProductCard";
 import { CategoryTree } from "@/components/public/CategoryTree";
+import { SearchInput } from "@/components/ui/SearchInput";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
-async function ProductsGrid({ categoryId }: { categoryId?: string }) {
+async function ProductsGrid({ categoryId, q }: { categoryId?: string; q?: string }) {
   // If categoryId is a main category, include all its sub-categories
   const subCategoryIds = categoryId
     ? (await prisma.category.findMany({ where: { parentId: categoryId }, select: { id: true } })).map(c => c.id)
@@ -18,6 +19,13 @@ async function ProductsGrid({ categoryId }: { categoryId?: string }) {
       ...(categoryId
         ? { categoryId: subCategoryIds.length > 0 ? { in: [categoryId, ...subCategoryIds] } : categoryId }
         : {}),
+      ...(q ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { shortDescription: { contains: q, mode: "insensitive" } },
+          { sku: { contains: q, mode: "insensitive" } },
+        ],
+      } : {}),
     },
     include: { images: { orderBy: { order: "asc" } } },
     orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -57,9 +65,9 @@ async function ProductsGrid({ categoryId }: { categoryId?: string }) {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }) {
-  const { category } = await searchParams;
+  const { category, q } = await searchParams;
 
   // Fetch tree for sidebar
   const tree = await prisma.category.findMany({
@@ -116,11 +124,20 @@ export default async function ProductsPage({
 
           {/* Product grid */}
           <main className="flex-1">
+            {/* Search bar */}
+            <div className="mb-6">
+              <Suspense>
+                <SearchInput
+                  placeholder="חיפוש מוצר..."
+                  className="max-w-sm"
+                />
+              </Suspense>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-6">
               <Suspense fallback={Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="bg-white border border-[#ECE8E2] rounded-2xl animate-pulse" style={{ aspectRatio: "0.85" }} />
               ))}>
-                <ProductsGrid categoryId={category} />
+                <ProductsGrid categoryId={category} q={q} />
               </Suspense>
             </div>
           </main>

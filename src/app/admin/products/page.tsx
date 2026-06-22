@@ -1,15 +1,24 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
-import { Plus, Search, Package } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { BulkImportButton } from "@/components/admin/BulkImportButton";
+import { SearchInput } from "@/components/ui/SearchInput";
 
-async function getProducts() {
+async function getProducts(q?: string) {
   try {
     return await prisma.product.findMany({
+      where: q ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { sku: { contains: q, mode: "insensitive" } },
+          { shortDescription: { contains: q, mode: "insensitive" } },
+        ],
+      } : undefined,
       include: { images: { where: { isPrimary: true }, take: 1 }, category: true },
       orderBy: { createdAt: "desc" },
     });
@@ -25,8 +34,13 @@ const tagLabels: Record<string, { label: string; variant: "gold" | "green" | "na
   PREMIUM: { label: "פרימיום", variant: "orange" },
 };
 
-export default async function ProductsPage() {
-  const products = await getProducts();
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const products = await getProducts(q);
 
   return (
     <div className="space-y-5">
@@ -48,16 +62,9 @@ export default async function ProductsPage() {
 
       {/* Filters */}
       <Card padding="sm">
-        <div className="flex gap-3 items-center">
-          <div className="relative flex-1 max-w-xs">
-            <Search size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="חיפוש מוצר..."
-              className="w-full pr-9 pl-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#B08D57]"
-            />
-          </div>
-        </div>
+        <Suspense>
+          <SearchInput placeholder="חיפוש לפי שם, מק״ט..." className="max-w-xs" />
+        </Suspense>
       </Card>
 
       {/* Table */}
